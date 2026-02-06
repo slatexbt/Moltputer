@@ -14,7 +14,8 @@
       "Bash(curl:*)",
       "Bash(git remote add:*)",
       "Bash(git branch:*)",
-      "Bash(gh repo view:*)"
+      "Bash(gh repo view:*)",
+      "Bash(git revert:*)"
     ]
   }
 }
