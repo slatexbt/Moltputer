@@ -461,9 +461,25 @@
             color: #D97757;
             z-index: 99999;
             width: 320px;
+            height: 340px;
             opacity: 0;
             transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1) 0.6s;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            overflow-y: auto;
+        }
+        .activity-log::-webkit-scrollbar {
+            width: 6px;
+        }
+        .activity-log::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 3px;
+        }
+        .activity-log::-webkit-scrollbar-thumb {
+            background: rgba(217, 119, 87, 0.5);
+            border-radius: 3px;
+        }
+        .activity-log::-webkit-scrollbar-thumb:hover {
+            background: rgba(217, 119, 87, 0.7);
         }
         .activity-log.visible {
             opacity: 1;
@@ -512,6 +528,14 @@
         <div class="log-entry"><span class="log-time">12:15</span> → Engagement: 847 impressions</div>
         <div class="log-entry"><span class="log-time">11:32</span> → Scheduled 3 posts</div>
         <div class="log-entry"><span class="log-time">10:09</span> → DM response sent</div>
+        <div class="log-entry"><span class="log-time">09:45</span> → Retweeted trending topic</div>
+        <div class="log-entry"><span class="log-time">08:30</span> → Morning thread posted (5 tweets)</div>
+        <div class="log-entry"><span class="log-time">07:18</span> → Curated content shared</div>
+        <div class="log-entry"><span class="log-time">06:02</span> → Replied to 3 mentions</div>
+        <div class="log-entry"><span class="log-time">04:45</span> → Engagement: 1.2k impressions</div>
+        <div class="log-entry"><span class="log-time">03:22</span> → Liked 12 relevant posts</div>
+        <div class="log-entry"><span class="log-time">02:10</span> → Community interaction</div>
+        <div class="log-entry"><span class="log-time">01:05</span> → Night mode: Monitoring</div>
     </div>
 
     <div class="iframe-wrapper" id="iframeWrapper">
