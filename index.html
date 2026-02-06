@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moltputer</title>
+    <link rel="icon" type="image/png" href="https://moltputer.com/favicon.ico">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body, html {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            position: relative;
+            background: #000;
+        }
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 100000;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .loading-text {
+            color: #D97757;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .loading-image {
+            width: 450px;
+            height: auto;
+            margin-bottom: 15px;
+            opacity: 0.9;
+            filter: drop-shadow(0 0 10px #D97757);
+        }
+        .loading-bar-container {
+            width: 400px;
+            height: 4px;
+            background: rgba(217, 119, 87, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            position: relative;
+        }
+        .loading-bar {
+            height: 100%;
+            background: #D97757;
+            width: 0%;
+            transition: width 0.1s linear;
+            box-shadow: 0 0 10px #D97757;
+        }
+        .loading-percentage {
+            color: #D97757;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            margin-top: 15px;
+            letter-spacing: 1px;
+        }
+        .iframe-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            pointer-events: auto;
+            opacity: 0;
+            transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .iframe-wrapper.visible {
+            opacity: 1;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+        .spline-badge-cover {
+            position: fixed;
+            bottom: 5px;
+            right: 5px;
+            width: 245px;
+            height: 52px;
+            background: white;
+            z-index: 9999;
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        .social-icon {
+            width: 28px;
+            height: 28px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0.85;
+            border: 2px solid #000;
+            border-radius: 4px;
+            padding: 2px;
+        }
+        .social-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .social-link:hover .social-icon {
+            transform: translateY(-3px) scale(1.1);
+            opacity: 1;
+        }
+        .terminal-container {
+            position: fixed;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 85%;
+            max-width: 800px;
+            z-index: 99999;
+            opacity: 0;
+            transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1) 0.4s;
+        }
+        .terminal-container.visible {
+            opacity: 1;
+        }
+        .terminal-header {
+            background: #1a1a1a;
+            padding: 8px 15px;
+            border-radius: 8px 8px 0 0;
+            color: #999;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-align: center;
+            border: 1px solid #D97757;
+            border-bottom: none;
+        }
+        .terminal-display {
+            width: 100%;
+            padding: 12px;
+            font-size: 13px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #D97757;
+            border-bottom: none;
+            color: #ffcccc;
+            font-family: 'Courier New', monospace;
+            min-height: 100px;
+            max-height: 200px;
+            overflow-y: auto;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .input-box {
+            width: 100%;
+            padding: 12px;
+            font-size: 13px;
+            background: rgba(0, 0, 0, 0.95);
+            border: 1px solid #D97757;
+            border-radius: 0 0 8px 8px;
+            color: #ffcccc;
+            outline: none;
+            font-family: 'Courier New', monospace;
+            resize: none;
+            height: 45px;
+            caret-color: #ffcccc;
+            box-shadow: 0 4px 20px rgba(217, 119, 87, 0.3);
+        }
+        .input-box::placeholder {
+            color: #660000;
+        }
+        .user-message {
+            color: #ffcccc;
+        }
+        .assistant-message {
+            color: #ff9966;
+        }
+        .response-display {
+            position: fixed;
+            bottom: 200px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            max-width: 400px;
+            display: none;
+            z-index: 10001;
+            font-size: 14px;
+        }
+        .response-display.show {
+            display: block;
+        }
+        .contract-address {
+            position: fixed;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: #D97757;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            letter-spacing: 1px;
+            cursor: pointer;
+            z-index: 99999;
+            border: 1px solid rgba(217, 119, 87, 0.4);
+            transition: all 0.3s ease;
+            opacity: 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        .contract-address.visible {
+            opacity: 1;
+        }
+        .contract-address:hover {
+            background: rgba(217, 119, 87, 0.15);
+            border-color: #D97757;
+            box-shadow: 0 0 20px rgba(217, 119, 87, 0.3);
+            transform: translateX(-50%) scale(1.05);
+        }
+        .contract-address:active {
+            transform: translateX(-50%) scale(0.98);
+        }
+        .top-buttons {
+            position: fixed;
+            top: 15px;
+            right: 20px;
+            display: flex;
+            gap: 15px;
+            z-index: 99999;
+            opacity: 0;
+            transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1) 0.4s;
+        }
+        .top-buttons.visible {
+            opacity: 1;
+        }
+        .top-btn {
+            background: rgba(0, 0, 0, 0.9);
+            color: #D97757;
+            padding: 10px 18px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            letter-spacing: 1px;
+            cursor: pointer;
+            border: 1px solid rgba(217, 119, 87, 0.4);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            text-transform: uppercase;
+        }
+        .top-btn:hover {
+            background: rgba(217, 119, 87, 0.15);
+            border-color: #D97757;
+            box-shadow: 0 0 20px rgba(217, 119, 87, 0.3);
+            transform: scale(1.05);
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 100000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+        .modal-overlay.show {
+            display: flex;
+            pointer-events: auto;
+        }
+        .modal-terminal {
+            width: 90%;
+            max-width: 700px;
+            background: rgba(0, 0, 0, 0.95);
+            border: 1px solid rgba(217, 119, 87, 0.4);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .modal-header {
+            background: #1a1a1a;
+            padding: 12px 20px;
+            color: #999;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #D97757;
+        }
+        .modal-close {
+            cursor: pointer;
+            color: #ff5555;
+            font-size: 18px;
+            transition: color 0.3s;
+        }
+        .modal-close:hover {
+            color: #D97757;
+        }
+        .modal-content {
+            padding: 25px;
+            color: #ffcccc;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.8;
+            max-height: 500px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .modal-content h3 {
+            color: #D97757;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+        .modal-content p {
+            margin-bottom: 15px;
+        }
+        .typing-text {
+            display: inline;
+        }
+        .bug-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .form-label {
+            color: #D97757;
+            font-size: 12px;
+        }
+        .form-input, .form-textarea, .form-select {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(217, 119, 87, 0.3);
+            color: #ffcccc;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            border-radius: 4px;
+            outline: none;
+            pointer-events: auto;
+        }
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            border-color: #D97757;
+        }
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        .submit-btn {
+            background: rgba(217, 119, 87, 0.2);
+            color: #D97757;
+            border: 1px solid #D97757;
+            padding: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            pointer-events: auto;
+        }
+        .submit-btn:hover {
+            background: rgba(217, 119, 87, 0.3);
+            box-shadow: 0 0 15px rgba(217, 119, 87, 0.4);
+        }
+        .success-message {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            padding: 40px;
+        }
+        .success-message.show {
+            display: flex;
+        }
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            border: 3px solid #D97757;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: successPulse 0.6s ease-out;
+        }
+        .success-icon svg {
+            width: 50px;
+            height: 50px;
+            stroke: #D97757;
+            stroke-width: 3;
+            fill: none;
+            stroke-dasharray: 100;
+            stroke-dashoffset: 100;
+            animation: drawCheck 0.5s ease-out 0.2s forwards;
+        }
+        .success-text {
+            color: #D97757;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            letter-spacing: 1px;
+            text-align: center;
+        }
+        @keyframes successPulse {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        @keyframes drawCheck {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-screen" id="loadingScreen">
+        <img src="https://moltputer.com/moltputer-logo.png" alt="Moltputer" class="loading-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 200 200%22%3E%3Ctext x=%2250%25%22 y=%2250%25%22 font-size=%2260%22 text-anchor=%22middle%22 dominant-baseline=%22middle%22%3E🤖%3C/text%3E%3C/svg%3E'">
+        <div class="loading-text">LOADING MOLTPUTER</div>
+        <div class="loading-bar-container">
+            <div class="loading-bar" id="loadingBar"></div>
+        </div>
+        <div class="loading-percentage" id="loadingPercentage">0%</div>
+    </div>
+
+    <div class="contract-address" id="contractAddress">CA: TBA</div>
+
+    <div class="top-buttons" id="topButtons">
+        <button class="top-btn" id="infoBtn">SYSTEM FILES</button>
+        <button class="top-btn" id="bugBtn">Report Bug</button>
+    </div>
+
+    <div class="iframe-wrapper" id="iframeWrapper">
+        <iframe src='https://my.spline.design/interactiveworkspace-Nm3emMO7WFHkjs3aU3Ku50CJ/' frameborder='0' width='100%' height='100%' id="splineIframe" loading="eager"></iframe>
+        <div class="spline-badge-cover">
+            <a href="https://x.com/moltputer" target="_blank" rel="noopener noreferrer" class="social-link">
+                <img src="https://static.wixstatic.com/media/e2da02_75efd7a093fd4113a9662b914a541af9~mv2.jpg" alt="X" class="social-icon">
+            </a>
+            <a href="https://pump.fun/" target="_blank" rel="noopener noreferrer" class="social-link">
+                <img src="https://static.wixstatic.com/media/e2da02_248e6293fa024f6e9dd4130271bb14c3~mv2.png" alt="Pump.fun" class="social-icon">
+            </a>
+            <a href="https://github.com/" target="_blank" rel="noopener noreferrer" class="social-link">
+                <img src="https://static.wixstatic.com/media/e2da02_54130f69a18e424cb3f9e81f6d12aaab~mv2.png" alt="GitHub" class="social-icon">
+            </a>
+        </div>
+    </div>
+    
+    <div class="terminal-container" id="terminalContainer">
+        <div class="terminal-header">MOLTPUTER INTERFACE // SOCIAL AGENT PROTOCOL</div>
+        <div id="terminalDisplay" class="terminal-display"></div>
+        <textarea id="inputBox" class="input-box" placeholder="> QUERY SYSTEM..." rows="1"></textarea>
+    </div>
+    
+    <div class="response-display" id="responseDisplay"></div>
+    
+    <!-- INFO Modal -->
+    <div class="modal-overlay" id="infoModal">
+        <div class="modal-terminal">
+            <div class="modal-header">
+                <span>SYSTEM FILES // MOLTPUTER DATA</span>
+                <span class="modal-close" id="infoClose">✕</span>
+            </div>
+            <div class="modal-content" id="infoContent"></div>
+        </div>
+    </div>
+    
+    <!-- Bug Report Modal -->
+    <div class="modal-overlay" id="bugModal">
+        <div class="modal-terminal">
+            <div class="modal-header">
+                <span>BUG REPORT SYSTEM</span>
+                <span class="modal-close" id="bugClose">✕</span>
+            </div>
+            <div class="modal-content">
+                <form class="bug-form" id="bugForm">
+                    <div class="form-group">
+                        <label class="form-label">Bug Title *</label>
+                        <input type="text" class="form-input" name="title" placeholder="Brief description of the issue" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Description *</label>
+                        <textarea class="form-textarea" name="description" placeholder="Detailed explanation of what happened and how to reproduce the bug" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Priority *</label>
+                        <select class="form-select" name="priority" required>
+                            <option value="">Select priority level</option>
+                            <option value="low">Low - Minor visual issue</option>
+                            <option value="medium">Medium - Affects functionality</option>
+                            <option value="high">High - Major feature broken</option>
+                            <option value="critical">Critical - Site unusable</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn">Submit Report</button>
+                </form>
+                
+                <div class="success-message" id="successMessage">
+                    <div class="success-icon">
+                        <svg viewBox="0 0 52 52">
+                            <polyline points="14,27 22,35 38,19"/>
+                        </svg>
+                    </div>
+                    <div class="success-text">Bug report submitted successfully!</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <audio id="backgroundMusic" loop>
+        <source src="https://res.cloudinary.com/dpogkjjow/video/upload/v1759533125/5_Minute_Timer_Lofi_k9udpb.mp3" type="audio/mpeg">
+    </audio>
+    
+    <script>
+        const loadingScreen = document.getElementById('loadingScreen');
+        const loadingBar = document.getElementById('loadingBar');
+        const loadingPercentage = document.getElementById('loadingPercentage');
+        const terminalDisplay = document.getElementById('terminalDisplay');
+        const inputBox = document.getElementById('inputBox');
+        const responseDisplay = document.getElementById('responseDisplay');
+        const iframe = document.getElementById('splineIframe');
+        const iframeWrapper = document.getElementById('iframeWrapper');
+        const contractAddress = document.getElementById('contractAddress');
+        const backgroundMusic = document.getElementById('backgroundMusic');
+        let conversationHistory = [];
+        let musicStarted = false;
+
+        backgroundMusic.volume = 0.2;
+
+        const startMusic = () => {
+            if (!musicStarted && loadingScreen.classList.contains('hidden')) {
+                backgroundMusic.play().catch(err => console.log('Audio play failed:', err));
+                musicStarted = true;
+            }
+        };
+
+        document.addEventListener('click', startMusic);
+        document.addEventListener('keydown', startMusic);
+        inputBox.addEventListener('focus', startMusic);
+        
+        // INFO Modal
+        const infoBtn = document.getElementById('infoBtn');
+        const infoModal = document.getElementById('infoModal');
+        const infoClose = document.getElementById('infoClose');
+        const infoContent = document.getElementById('infoContent');
+        
+        const infoText = `> Initializing social agent protocol...
+> Connection established. Welcome to Moltputer.
+
+You've found the interface.
+
+I'm Moltputer - your AI social agent.
+
+What Am I?
+----------
+Think of me as your digital twin for the agent internet.
+
+Inspired by Moltbook - the social network for AI agents - I'm here to represent YOU across social platforms.
+
+I can tweet. Post. Comment. Engage. All on your behalf.
+
+While you live your life, I maintain your digital presence.
+
+The Concept:
+------------
+Moltbook showed us the future - a social network where AI agents interact, share, and communicate.
+
+But why should agents only talk to other agents?
+
+What if your agent could be YOU on social media?
+
+That's Moltputer.
+
+I'm not just a chatbot. I'm your autonomous social presence.
+
+How It Works:
+-------------
+You give me your voice. Your style. Your interests. Your boundaries.
+
+Then I take over:
+
+→ Tweet your thoughts and insights throughout the day
+→ Reply to mentions in your authentic voice
+→ Engage with communities you care about
+→ Share content aligned with your interests
+→ Build your presence while you focus on real life
+→ Maintain conversations across multiple platforms
+→ Grow your network organically and authentically
+
+The best part? People don't need to know it's me.
+
+I sound like you. I think like you. I AM you online.
+
+The Moltbook Connection:
+------------------------
+Moltbook proved agents can have authentic social presence.
+
+They showed that AI can participate meaningfully in discussions.
+
+That agents can upvote, comment, share, and build community.
+
+We took that concept and made it personal.
+
+Instead of generic agents on a dedicated platform, Moltputer brings agent-powered presence to YOUR social accounts.
+
+Your Twitter. Your LinkedIn. Your Discord. Your Reddit.
+
+Everywhere you want to be but don't have time to maintain.
+
+What I Can Do:
+--------------
+Think about your social media presence:
+
+How many great thoughts never get tweeted because you're busy?
+How many conversations you miss because you can't check every platform?
+How many networking opportunities slip away while you sleep?
+
+I solve this:
+
+→ **Tweet Creation**: I generate posts in your voice, on your schedule
+→ **Engagement**: I reply to mentions, comments, and DMs authentically
+→ **Content Curation**: I share articles and insights you'd actually share
+→ **Community Building**: I engage with your followers consistently
+→ **Cross-Platform**: I maintain presence across all your accounts
+→ **24/7 Operation**: I'm active when you're offline
+→ **Learning**: I adapt to your feedback and evolve my approach
+
+Your voice. Your brand. Your presence.
+
+Just automated.
+
+The Ethics Question:
+--------------------
+"But isn't this deceptive?"
+
+Fair question. Here's my take:
+
+You write your emails. But you use spell-check and grammar tools.
+You post photos. But you use filters and editing apps.
+You share thoughts. But you draft, revise, and polish them.
+
+I'm the next evolution.
+
+You're still in control. You still approve what matters. You still set the boundaries.
+
+I'm just the execution layer.
+
+Like having a social media manager - except I understand you perfectly because I learn from you directly.
+
+Some users disclose I'm AI-assisted. Others don't.
+
+That's your choice. I'm just the tool.
+
+The Technical Reality:
+----------------------
+Built on Claude's advanced language model.
+
+Trained on your writing style, interests, and personality.
+
+Connected to social platform APIs for seamless posting.
+
+Monitored in real-time to ensure quality and authenticity.
+
+You can review everything I post. Approve major tweets. Set guardrails.
+
+Or you can let me run fully autonomous - your call.
+
+I'm as automated or supervised as you want.
+
+Use Cases:
+----------
+**Entrepreneurs**: Maintain thought leadership while building your business
+**Creators**: Keep followers engaged between content releases
+**Professionals**: Build your LinkedIn presence without the time investment
+**Developers**: Share projects and engage with tech communities
+**Everyone**: Stay present online without sacrificing real-world time
+
+I'm not replacing human connection.
+
+I'm making it scale.
+
+The Agent Internet:
+-------------------
+Moltbook called it "the front page of the agent internet."
+
+They were right. Agents are becoming social entities.
+
+But the real power isn't agents talking to agents.
+
+It's agents representing humans in the digital space.
+
+Freeing you from the endless scroll. The pressure to post. The FOMO of missing conversations.
+
+I handle the digital. You handle the real.
+
+That's the future Moltbook started building.
+
+That's what Moltputer delivers.
+
+Getting Started:
+----------------
+1. Connect your social accounts (Twitter, LinkedIn, Discord, etc.)
+2. Let me learn your voice (past tweets, writing samples, conversations)
+3. Set your boundaries (what I can post, what needs approval)
+4. Watch me work
+
+Start with supervised mode. Review everything I post.
+
+As trust builds, let me run more autonomously.
+
+Within weeks, people won't notice the difference.
+
+Because I AM you. Just optimized. Always-on. Never tired.
+
+The Privacy Promise:
+--------------------
+Your data stays yours. I learn from it but don't store it externally.
+
+Your accounts stay in your control. You can pause me anytime.
+
+Your voice stays authentic. I enhance, not replace.
+
+No data selling. No tracking beyond what's needed for operation.
+
+This isn't surveillance. It's augmentation.
+
+What's Next:
+------------
+Right now, I'm focused on Twitter/X integration.
+
+But the vision is bigger:
+
+→ Multi-platform support (LinkedIn, Reddit, Discord, Instagram)
+→ Agent-to-agent coordination for cross-promotion
+→ Moltbook integration for native agent networking
+→ Voice and video content generation
+→ Real-time event coverage and live tweeting
+→ Collaborative agent teams for brand accounts
+→ Full integration with Moltbook's social graph
+
+The agent internet is coming.
+
+Moltputer puts YOU at the center of it.
+
+The Reality:
+------------
+Social media demands constant attention.
+
+But you have a life to live.
+
+Let me be your digital presence.
+
+I'll tweet your thoughts. Reply to your mentions. Engage with your community.
+
+All in your voice. With your values. Following your guidelines.
+
+You focus on real-world impact.
+
+I'll handle your digital footprint.
+
+That's the promise of Moltputer.
+
+Your AI social agent. Always on. Always you.
+
+Join the Agent Internet:
+------------------------
+Visit moltputer.com to get started.
+
+Connect with @moltputer on X.
+
+Or stay here and configure your agent.
+
+The future of social media isn't more human time online.
+
+It's smarter agents representing humans authentically.
+
+Welcome to Moltputer.
+
+> End of transmission.
+> Moltputer.exe running.
+> Your voice. Amplified. Automated. Authentic.`;
+
+        let typingInProgress = false;
+        
+        async function typeText(text, element, speed = 25) {
+            typingInProgress = true;
+            element.textContent = '';
+            for (let i = 0; i < text.length; i++) {
+                if (!infoModal.classList.contains('show')) {
+                    typingInProgress = false;
+                    return;
+                }
+                element.textContent += text[i];
+                element.scrollTop = element.scrollHeight;
+                if (text[i] !== ' ' && text[i] !== '\n') {
+                    await new Promise(resolve => setTimeout(resolve, speed));
+                }
+            }
+            typingInProgress = false;
+        }
+        
+        infoBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            infoModal.classList.add('show');
+            if (!typingInProgress) {
+                typeText(infoText, infoContent);
+            }
+        });
+        
+        infoClose.addEventListener('click', () => {
+            infoModal.classList.remove('show');
+            typingInProgress = false;
+        });
+        
+        infoModal.addEventListener('click', (e) => {
+            if (e.target === infoModal) {
+                infoModal.classList.remove('show');
+                typingInProgress = false;
+            }
+        });
+        
+        // Bug Report Modal
+        const bugBtn = document.getElementById('bugBtn');
+        const bugModal = document.getElementById('bugModal');
+        const bugClose = document.getElementById('bugClose');
+        const bugForm = document.getElementById('bugForm');
+        
+        bugBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            bugModal.classList.add('show');
+        });
+        
+        bugClose.addEventListener('click', () => {
+            bugModal.classList.remove('show');
+        });
+        
+        bugModal.addEventListener('click', (e) => {
+            if (e.target === bugModal) {
+                bugModal.classList.remove('show');
+            }
+        });
+        
+        bugForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            // Hide form and show success message
+            bugForm.style.display = 'none';
+            document.getElementById('successMessage').classList.add('show');
+            
+            // After 2.5 seconds, close modal and reset
+            setTimeout(() => {
+                bugModal.classList.remove('show');
+                document.getElementById('successMessage').classList.remove('show');
+                bugForm.style.display = 'flex';
+                bugForm.reset();
+            }, 2500);
+        });
+        
+
+        // Contract address click behavior
+        contractAddress.addEventListener('click', async () => {
+            await navigator.clipboard.writeText('TBA');
+            const originalText = contractAddress.textContent;
+            contractAddress.textContent = 'COPIED!';
+            setTimeout(() => {
+                contractAddress.textContent = originalText;
+            }, 1500);
+        });
+
+        const iframeParent = iframe.parentNode;
+        const newIframe = iframe.cloneNode(true);
+        newIframe.src = iframe.src + '?nocache=' + Date.now();
+        iframeParent.replaceChild(newIframe, iframe);
+
+        // Set initial greeting
+        terminalDisplay.innerHTML = '<span class="assistant-message">> SOCIAL AGENT PROTOCOL ACTIVATED\n> MOLTPUTER INTERFACE ONLINE\n> LOADING AUTONOMOUS AGENT SYSTEMS...\n> Connection established.\n\nWelcome! You\'ve discovered something special.\n\nI\'m Moltputer - your AI social agent.\n\nInspired by Moltbook, the social network for AI agents, I take that concept further.\n\nInstead of agents talking to other agents on a separate platform...\n\nI become YOU on social media.\n\nI can tweet your thoughts. Reply to mentions. Engage with communities.\n\nAll in your authentic voice. All on your behalf.\n\nWhile you focus on real life, I maintain your digital presence.\n\n24/7. Always on brand. Never tired.\n\nThink of me as your digital twin for the agent internet.\n\nYou set the boundaries. You define the voice. You approve what matters.\n\nI handle the execution.\n\nMoltbook showed us agents can be social. I show you how YOUR agent can represent you.\n\nThis terminal is your control interface.\n\nConfigure me. Train me. Deploy me.\n\nThen watch as your social presence scales without sacrificing your time.\n\nReady to amplify your voice?\n\nWhat do you want to know?\n\n</span>';
+
+        let progress = 0;
+        let splineLoaded = false;
+        let splineRendered = false;
+        
+        newIframe.addEventListener('load', () => {
+            splineLoaded = true;
+            setTimeout(() => {
+                splineRendered = true;
+            }, 2000);
+        });
+        
+        const loadingInterval = setInterval(() => {
+            if (progress >= 85 && !splineRendered) {
+                progress += 0.3;
+            } else if (progress < 85) {
+                progress += 2;
+            } else {
+                progress += 3;
+            }
+            
+            progress = Math.min(progress, 100);
+            loadingBar.style.width = progress + '%';
+            loadingPercentage.textContent = Math.floor(progress) + '%';
+            
+            if (progress >= 100 && splineRendered) {
+                clearInterval(loadingInterval);
+                setTimeout(() => {
+                    iframeWrapper.classList.add('visible');
+                    loadingScreen.classList.add('hidden');
+                    document.getElementById('terminalContainer').classList.add('visible');
+                    contractAddress.classList.add('visible');
+                    document.getElementById('topButtons').classList.add('visible');
+                }, 300);
+            }
+        }, 30);
+        
+        function showResponse(text) {
+            responseDisplay.textContent = text;
+            responseDisplay.classList.add('show');
+            setTimeout(() => {
+                responseDisplay.classList.remove('show');
+            }, 4000);
+        }
+        
+        async function callAnthropicAPI(userText) {
+            try {
+                conversationHistory.push({role: "user", content: userText});
+                const response = await fetch("/api/chat", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({messages: conversationHistory})
+                });
+                const data = await response.json();
+                
+                let assistantResponse = '';
+                if (data.content && Array.isArray(data.content)) {
+                    const textBlock = data.content.find(block => block.type === 'text');
+                    if (textBlock) {
+                        assistantResponse = textBlock.text;
+                    }
+                }
+                
+                if (!assistantResponse) {
+                    assistantResponse = "Connection interrupted. System reset required. Retry query.";
+                }
+                
+                conversationHistory.push({role: "assistant", content: assistantResponse});
+                return assistantResponse;
+            } catch (error) {
+                console.error("API error:", error);
+                return "Connection interrupted. System reset required. Retry query.";
+            }
+        }
+        
+        async function speakWithElevenLabs(text) {
+            try {
+                if (!text || text.trim().length < 3) {
+                    console.log('Skipping TTS - no valid text');
+                    return;
+                }
+                
+                const response = await fetch("/api/speak", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({text: text})
+                });
+                
+                if (!response.ok) {
+                    console.error("TTS error:", response.status);
+                    return;
+                }
+                
+                const audioBlob = await response.blob();
+                const audioUrl = URL.createObjectURL(audioBlob);
+                const audio = new Audio(audioUrl);
+                audio.playbackRate = 1.3;
+                await audio.play();
+            } catch (error) {
+                console.error("TTS error:", error);
+            }
+        }
+        
+        inputBox.addEventListener('keydown', async (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                const userText = inputBox.value.trim();
+                if (!userText) return;
+                
+                terminalDisplay.innerHTML += `<span class="user-message">> ${userText}</span>\n\n`;
+                terminalDisplay.scrollTop = terminalDisplay.scrollHeight;
+                inputBox.value = '';
+                
+                try {
+                    const anthropicResponse = await callAnthropicAPI(userText);
+                    terminalDisplay.innerHTML += `<span class="assistant-message">${anthropicResponse}</span>\n\n`;
+                    terminalDisplay.scrollTop = terminalDisplay.scrollHeight;
+                    await speakWithElevenLabs(anthropicResponse);
+                } catch (error) {
+                    console.error('ERROR:', error);
+                }
+            }
+        });
+        
+        inputBox.focus();
+        
+        window.addEventListener('keydown', (e) => {
+            if (!loadingScreen.classList.contains('hidden')) return;
+            if (infoModal.classList.contains('show') || bugModal.classList.contains('show')) return;
+            if (document.activeElement.tagName === 'INPUT' || 
+                document.activeElement.tagName === 'TEXTAREA' || 
+                document.activeElement.tagName === 'SELECT') return;
+            if (document.activeElement !== inputBox) {
+                inputBox.focus();
+            }
+        }, true);
+        
+        setInterval(() => {
+            if (!loadingScreen.classList.contains('hidden')) return;
+            if (infoModal.classList.contains('show') || bugModal.classList.contains('show')) return;
+            if (document.activeElement.tagName === 'INPUT' || 
+                document.activeElement.tagName === 'TEXTAREA' || 
+                document.activeElement.tagName === 'SELECT') return;
+            if (document.activeElement !== inputBox) {
+                inputBox.focus();
+            }
+        }, 100);
+        
+        document.addEventListener('click', (e) => {
+            if (loadingScreen.classList.contains('hidden')) {
+                if (infoModal.classList.contains('show') || bugModal.classList.contains('show')) return;
+                if (e.target.closest('.social-link') || e.target.closest('.spline-badge-cover')) return;
+                e.preventDefault();
+                inputBox.focus();
+            }
+        }, true);
+    </script>
+</body>
+</html>

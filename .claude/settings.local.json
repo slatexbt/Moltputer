@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir)",
+      "Bash(move Qputer Qputer_backup)",
+      "Bash(git clone:*)",
+      "Bash(ren:*)",
+      "Bash(git remote set-url:*)",
+      "Bash(git fetch:*)",
+      "Bash(git reset:*)",
+      "Bash(git push:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(curl:*)"
+    ]
+  }
+}
