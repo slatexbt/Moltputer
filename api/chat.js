@@ -17,7 +17,7 @@ export default async function handler(req, res) {
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        "HTTP-Referer": "https://moltputer.vercel.app",
+        "HTTP-Referer": "https://moltputer.com",
         "X-Title": "Moltputer"
       },
       body: JSON.stringify({

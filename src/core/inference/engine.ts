@@ -99,7 +99,7 @@ export class InferenceEngine {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        'HTTP-Referer': process.env.REFERER_URL || 'https://moltputer.vercel.app',
+        'HTTP-Referer': process.env.REFERER_URL || 'https://moltputer.com',
       },
       body: JSON.stringify({
         model: this.config.model || 'anthropic/claude-3.7-sonnet',
