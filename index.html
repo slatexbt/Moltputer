@@ -1067,6 +1067,10 @@ Welcome to Moltputer.
                 }
                 
                 conversationHistory.push({role: "assistant", content: assistantResponse});
+
+                // Add to activity log
+                addLogEntry('system', `AI thought generated: ${assistantResponse.substring(0, 60)}${assistantResponse.length > 60 ? '...' : ''}`);
+
                 return assistantResponse;
             } catch (error) {
                 console.error("API error:", error);
