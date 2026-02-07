@@ -556,7 +556,7 @@
     </div>
 
     <div class="activity-log" id="activityLog">
-        <div class="log-header">Agent Activity</div>
+        <div class="log-header">Moltputer Activity</div>
         <div id="logEntries"></div>
     </div>
 
@@ -1139,24 +1139,31 @@ Welcome to Moltputer.
         // Activity log system
         const logEntries = document.getElementById('logEntries');
         const activityData = [
-            { category: 'info', message: 'Tweet posted: "Building the future of AI agents..."', link: 'https://x.com/moltputer/status/1234567890' },
+            { category: 'system', message: 'Planning tweet sequence...' },
             { category: 'system', message: 'AI thought generated: opinion' },
+            { category: 'info', message: 'Tweet posted: "Building the future of AI agents..."' },
+            { category: 'system', message: 'Thinking: analyzing community sentiment' },
             { category: 'system', message: 'AI thought generated: observation' },
-            { category: 'info', message: 'Tweet posted: "Agent activity increasing..."', link: 'https://x.com/moltputer/status/1234567891' },
+            { category: 'info', message: 'Tweet posted: "Agent activity increasing..."' },
+            { category: 'system', message: 'Writing response to mention...' },
             { category: 'system', message: 'AI thought generated: reaction' },
             { category: 'trade', message: 'Engagement spike detected: +2.4k impressions' },
+            { category: 'system', message: 'Planning content strategy' },
             { category: 'system', message: 'AI thought generated: thought' },
             { category: 'info', message: 'Replied to @crypto_dev' },
+            { category: 'system', message: 'Thinking: processing new mentions' },
             { category: 'system', message: 'AI thought generated: opinion' },
             { category: 'system', message: 'Bot status updated: ONLINE (ACTIVE)' },
-            { category: 'info', message: 'Tweet posted: "Your digital presence, amplified..."', link: 'https://x.com/moltputer/status/1234567892' },
+            { category: 'system', message: 'Writing tweet draft...' },
+            { category: 'info', message: 'Tweet posted: "Your digital presence, amplified..."' },
             { category: 'system', message: 'AI thought generated: observation' },
             { category: 'trade', message: 'Community interaction: 15 replies sent' },
+            { category: 'system', message: 'Planning tomorrow\'s content' },
             { category: 'system', message: 'AI thought generated: reaction' },
             { category: 'info', message: 'Scheduled 5 posts for tomorrow' }
         ];
 
-        function addLogEntry(category, message, link = null) {
+        function addLogEntry(category, message) {
             const now = new Date();
             const timeStr = now.toTimeString().slice(0, 8);
 
@@ -1166,7 +1173,6 @@ Welcome to Moltputer.
                 <span class="log-time">[${timeStr}]</span>
                 <span class="log-category ${category}">${category}</span>
                 <span class="log-message">${message}</span>
-                ${link ? `<a href="${link}" target="_blank" class="log-link">${link}</a>` : ''}
             `;
 
             logEntries.insertBefore(entry, logEntries.firstChild);
@@ -1181,7 +1187,7 @@ Welcome to Moltputer.
         setTimeout(() => {
             for (let i = activityData.length - 1; i >= Math.max(0, activityData.length - 10); i--) {
                 const item = activityData[i];
-                addLogEntry(item.category, item.message, item.link);
+                addLogEntry(item.category, item.message);
             }
         }, 2000);
 
@@ -1190,7 +1196,7 @@ Welcome to Moltputer.
         setInterval(() => {
             if (activityIndex < activityData.length) {
                 const item = activityData[activityIndex];
-                addLogEntry(item.category, item.message, item.link);
+                addLogEntry(item.category, item.message);
                 activityIndex++;
             } else {
                 // Loop back
