@@ -1174,7 +1174,7 @@ Welcome to Moltputer.
                 <span class="log-time">[${timeStr}]</span>
                 <span class="log-category ${category}">${category}</span>
                 <span class="log-message">${message}</span>
-                ${link ? `<a href="${link}" target="_blank" class="log-link">${link}</a>` : ''}
+                ${link ? `<a href="${link}" target="_blank" rel="noopener noreferrer" class="log-link">${link}</a>` : ''}
             `;
 
             logEntries.insertBefore(entry, logEntries.firstChild);
